@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://type-game-main.vercel.app/sitemap.xml
