@@ -21,7 +21,7 @@ export function Menu() {
       {/* title */}
       <div className="text-center">
         <div className="text-xs tracking-[0.4em] text-gray-400 mb-2">PHOBOSLAB CLONE</div>
-        <h1 className="text-7xl font-black text-white tracking-tight">ZTYPE</h1>
+        <h1 className="text-7xl font-black text-white tracking-tight">GENZ</h1>
       </div>
 
       {/* stats */}

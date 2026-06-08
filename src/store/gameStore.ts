@@ -153,11 +153,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ multiplier: 1, stats: { ...get().stats, multiplier: 1 } })
   },
   clearAllEnemies: () => {
-    set((state) => ({
-      enemies: [],
-      activeEnemyId: null,
-    }))
-  },
+  set({
+    enemies: [],
+    activeEnemyId: null,
+  })
+},
   addKill: () => {
     const { kills, killsToNext } = get()
     const newKills = kills + 1
