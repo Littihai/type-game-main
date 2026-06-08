@@ -1,0 +1,12 @@
+{
+  "thai": {
+    "easy": ["ไก่","ปลา","นก","แมว","วิ่ง","ชนะ","ตี","บิน","ยิง","อยู่","ให้","ได้","ขึ้น","ลง","ไป","มา","เอา","ซ่อน","ออก","เข้า"],
+    "medium": ["ทะเล","ดวงดาว","ยานอวกาศ","โจมตี","ป้องกัน","รวมกัน","ทำลาย","สกัดกั้น","เร่งความเร็ว","ระเบิด","พลัง","เกราะ","ปืน","ภูมิศาสตร์","อวกาศ"],
+    "hard": ["จาวาสคริปต์","ไทยสคริปต์","ตัวประกอบ","การระเบิด","ผู้ทำลาย","การสกัดกั้น","ความเร่ง","การรวมกัน","กลุ่มดาว","แม่เหล็กไฟฟ้า","ปฏิวัติ","โครงสร้างพื้นฐาน"]
+  },
+  "english": {
+    "easy": ["cat","dog","run","fly","win","hit","sky","gun","ray","sun","fire","wave","dash","jump","bomb","shot","fast","code","play","kill"],
+    "medium": ["laser","pixel","score","speed","enemy","space","blast","power","shield","turret","battle","rocket","attack","defend","galaxy"],
+    "hard": ["javascript","typescript","component","spaceship","explosion","destroyer","intercept","projectile","accelerate","combination"]
+  }
+}
