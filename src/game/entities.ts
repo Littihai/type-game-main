@@ -60,33 +60,3 @@ export function createEnemy(wave: number, language: Language, difficulty: Diffic
 
 // Initialize word data on module load
 loadWordData().catch(e => console.error('Error loading word data:', e))
-
-// import type { Enemy } from '../store/gameStore'
-
-// let counter = 0
-
-// function getWordPool(wave: number): string[] {
-//   if (wave <= 2)  return ['ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc']
-//   if (wave <= 4)  return ['ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc']
-//   if (wave <= 6)  return ['ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc']
-//   return ['ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc','ccccccccc']
-// }
-
-// export function getWaveConfig(wave: number) {
-//   return {
-//     spawnInterval: Math.max(2500 - wave * 2000, 600),  // spawn เร็วขึ้นทุก wave
-//     maxEnemies:    Math.min(200 + wave, 250),             // ยานบนจอเพิ่มขึ้น
-//     speed:         0.4 + wave * 0.08,                 // เร็วขึ้นทุก wave
-//     killsToNext:   8 + wave * 2,                      // kills ที่ต้องการไป wave ถัดไป
-//     wordPool:      getWordPool(wave),
-//   }
-// }
-
-// export function createEnemy(wave: number): Enemy {
-//   const config = getWaveConfig(wave)
-//   const id = `enemy_${++counter}_${Date.now()}`
-//   const word = config.wordPool[Math.floor(Math.random() * config.wordPool.length)]
-//   const x = Math.random() * 660 + 70
-
-//   return { id, x, y: 0, word, typed: '', speed: config.speed }
-// }
