@@ -1,5 +1,5 @@
 // import { useEffect, useState } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react' // <--- เพิ่ม useState เข้ามา
 import { useGameStore } from './store/gameStore'
 import { useKeyboard } from './hooks/useKeyboard'
 import { useGameLoop } from './hooks/useGameLoop'
@@ -14,7 +14,23 @@ import { Settings } from './components/Settings'
 function Game() {
   useKeyboard()
   useGameLoop()
-  const { status, settings } = useGameStore()
+  
+  const { status, settings, enableGodModeAutoType } = useGameStore()
+  
+  // 🔔 [เพิ่มตรงนี้]: State สำหรับเก็บข้อความแจ้งเตือนโหมดเทพ
+  const [notification, setNotification] = useState<string | null>(null)
+
+  // 🔥 [เพิ่มตรงนี้]: เปิดระบบโหมดเทพ และส่ง Callback สำหรับแสดงแจ้งเตือน
+  useEffect(() => {
+    const onToggleGodMode = (message: string) => {
+      setNotification(message)
+      // ให้ข้อความแจ้งเตือนหายไปเองหลังจากผ่านไป 2 วินาที
+      setTimeout(() => setNotification(null), 2000)
+    }
+
+    const cleanup = enableGodModeAutoType(onToggleGodMode)
+    return () => cleanup() 
+  }, [enableGodModeAutoType])
 
   // Background music control
   useEffect(() => {
@@ -40,6 +56,16 @@ function Game() {
       {status === 'menu'      && <div className="absolute inset-0"><Menu /></div>}
       {status === 'settings'  && <div className="absolute inset-0"><Settings /></div>}
       {status === 'gameover'  && <div className="absolute inset-0"><GameOver /></div>}
+
+      {/* 🚨 [เพิ่มตรงนี้]: UI กล่องแจ้งเตือนระบบเทพ (จะแสดงตรงกลางด้านบนของจอเกม) */}
+      {notification && (
+        <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-50 
+                        bg-yellow-500 text-slate-950 px-6 py-2 rounded-full font-bold shadow-lg 
+                        border-2 border-white animate-bounce text-center min-w-[200px]"
+             style={{ boxShadow: '0 0 20px rgba(234, 179, 8, 0.6)' }}>
+          {notification}
+        </div>
+      )}
     </div>
   )
 }

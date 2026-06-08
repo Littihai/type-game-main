@@ -43,6 +43,7 @@ export interface GameState {
   stats: GameStats
   settings: GameSettings
   particles: Particle[]
+  isGodMode: boolean // 🦾 เก็บสถานะ เปิด/ปิด โหมดเทพ
   setStatus: (s: GameStatus) => void
   setActiveEnemy: (id: string | null) => void
   setLanguage: (lang: Language) => void
@@ -64,6 +65,7 @@ export interface GameState {
   increaseMultiplier: () => void
   resetMultiplier: () => void
   clearAllEnemies: () => void
+  enableGodModeAutoType: (onToggle: (msg: string) => void) => () => void // 🦾 ฟังก์ชันเริ่มต้นระบบพิมพ์เทพ
 }
 
 export const useGameStore = create<GameState>((set, get) => ({
@@ -91,6 +93,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     backgroundMusic: true,
   },
   particles: [],
+  isGodMode: false, // เริ่มต้นเกมโหมดเทพจะเป็นปิดเสมอ
 
   setStatus: (s) => set({ status: s }),
   setActiveEnemy: (id) => set({ activeEnemyId: id }),
@@ -153,11 +156,11 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ multiplier: 1, stats: { ...get().stats, multiplier: 1 } })
   },
   clearAllEnemies: () => {
-  set({
-    enemies: [],
-    activeEnemyId: null,
-  })
-},
+    set({
+      enemies: [],
+      activeEnemyId: null,
+    })
+  },
   addKill: () => {
     const { kills, killsToNext } = get()
     const newKills = kills + 1
@@ -195,4 +198,71 @@ export const useGameStore = create<GameState>((set, get) => ({
       multiplier: 1,
     }
   }),
+
+  // 🔥 ฟังก์ชันควบคุมโหมดเทพดักจับปุ่มพิมพ์และสั่งยิงคำอัตโนมัติ
+  enableGodModeAutoType: (onToggle) => {
+    // 1. วนลูปเช็คเพื่อพิมพ์ตัวอักษรถัดไปอัตโนมัติ
+    const autoTypeInterval = setInterval(() => {
+      const { isGodMode, status, enemies, activeEnemyId, recordChar, increaseMultiplier, updateEnemyTyped, recordWord, addScore, addKill, removeEnemy, setActiveEnemy } = get()
+
+      // ถ้าไม่ได้เปิดโหมดเทพ หรือไม่ได้อยู่ในหน้าเล่นเกม หรือไม่มีศัตรูโผล่มา ให้ข้ามลูปนี้ไปก่อน
+      if (!isGodMode || status !== 'playing' || enemies.length === 0) return
+
+      // ล็อกเป้าศัตรู: ถ้ามีตัวที่กำลังพิมพ์ค้างไว้ให้เลือกตัวนั้น ถ้าไม่มีให้เอาตัวแรกสุดในแถว
+      let targetEnemy = enemies.find(e => e.id === activeEnemyId)
+      if (!targetEnemy && enemies.length > 0) {
+        targetEnemy = enemies[0]
+        setActiveEnemy(targetEnemy.id)
+      }
+
+      if (!targetEnemy) return
+
+      const currentTyped = targetEnemy.typed
+      const targetWord = targetEnemy.word
+
+      // ถ้าคำยังพิมพ์ไม่ครบ ให้จำลองการพิมพ์ตัวอักษรถัดไปทันทีอย่างแม่นยำ
+      if (currentTyped.length < targetWord.length) {
+        const nextChar = targetWord[currentTyped.length]
+        const newTyped = currentTyped + nextChar
+
+        recordChar(true)
+        increaseMultiplier()
+        updateEnemyTyped(targetEnemy.id, newTyped)
+
+        // ถ้าพิมพ์ครบคำสมบูรณ์แล้ว ให้ทำลายศัตรูทิ้งและรับรางวัลคะแนน/Kills
+        if (newTyped === targetWord) {
+          recordWord()
+          addScore(targetWord.length * 10)
+          addKill()
+          removeEnemy(targetEnemy.id)
+        }
+      }
+    }, 100) // ความเร็วการพิมพ์ออโต้: 100ms ต่อ 1 ตัวอักษร (ปรับลดให้เร็วสะใจขึ้นได้ที่นี่)
+
+    // 2. ฟังก์ชันจับคีย์บอร์ดทางลัด Ctrl + Shift + M
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'm') {
+        e.preventDefault()
+        const currentGodMode = get().isGodMode
+        const nextGodMode = !currentGodMode
+        
+        set({ isGodMode: nextGodMode })
+        
+        // ส่งข้อความกลับไปหา UI เพื่อแจ้งเตือนหน้าจอเกม
+        if (nextGodMode) {
+          onToggle("🦾 ระบบเทพทำงาน!")
+        } else {
+          onToggle("🛑 ปิดระบบเทพ")
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    // คืนค่าฟังก์ชัน Cleanup สำหรับถอดถอน Interval และ Event ทิ้งเมื่อออกจากหน้าเกม
+    return () => {
+      clearInterval(autoTypeInterval)
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+  }
 }))
