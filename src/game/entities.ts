@@ -33,7 +33,9 @@ async function loadWordData() {
 
 function getWordPool(wave: number, language: Language, difficulty: Difficulty): string[] {
   const data = wordData || fallbackWordPool
-  const words = data[language]?.[difficulty] || []
+  // Could use wave to pick harder words over time, e.g.:
+  const effectiveDifficulty = wave > 5 ? 'hard' : wave > 2 ? 'medium' : difficulty
+  const words = data[language]?.[effectiveDifficulty] || []
   return words.length > 0 ? words : fallbackWordPool['english']['easy']
 }
 
