@@ -2,10 +2,9 @@ import { useGameStore } from '../store/gameStore'
 import { loadStorage } from '../store/storageStore'
 
 export function HUD() {
-  const { score, lives, wave, kills, killsToNext, multiplier, isPaused, togglePause, status } = useGameStore()
+  const { score, lives, wave, kills, killsToNext, multiplier } = useGameStore()
   const { highScore } = loadStorage()
   const progress = Math.min((kills / killsToNext) * 100, 100)
-  const isGamePlaying = status === 'playing';
 
   return (
     <div className="absolute top-0 left-0 w-full pointer-events-none select-none">
@@ -148,17 +147,6 @@ export function HUD() {
           </div>
         </div>
       </div>
-
-      {/* Pause Button */}
-      {isGamePlaying && ( // แสดงปุ่มเมื่อเกมกำลังเล่นเท่านั้น
-        <button
-          onClick={togglePause} // เรียกฟังก์ชัน togglePause เมื่อคลิก
-          className="absolute top-4 right-20 z-50 p-2 bg-gray-800/70 hover:bg-gray-700/80 text-white rounded-md transition-colors pointer-events-auto"
-          aria-label={isPaused ? 'Resume Game' : 'Pause Game'}
-        >
-          {isPaused ? '▶️' : '⏸️'}
-        </button>
-      )}
     </div>
   )
 }
