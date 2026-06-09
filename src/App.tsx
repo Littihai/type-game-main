@@ -11,6 +11,7 @@ import { GameOver } from './components/GameOver'
 import { WaveClear } from './components/WaveClear'
 import { Settings } from './components/Settings'
 import { Analytics } from "@vercel/analytics/react"
+import { StarBackground } from './components/StarBackground'
 function Game() {
   useKeyboard()
   useGameLoop()
@@ -48,8 +49,10 @@ function Game() {
   }, [settings])
 
   return (
-    <div className="relative w-[800px] h-[600px] mx-auto overflow-hidden"
-         style={{ background: '#0a0a1a' }}>
+    <div
+  className="relative w-[800px] h-[600px] mx-auto overflow-hidden"
+  style={{ background: 'transparent' }}
+>
       <GameCanvas />
       {status === 'playing'   && <HUD />}
       {status === 'waveclear' && <WaveClear />}
@@ -72,8 +75,14 @@ function Game() {
 
 export default function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center"
-         style={{ background: '#05050f' }}>
+    <div
+  className="min-h-screen flex items-center justify-center"
+  style={{
+    background:
+      'radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%)'
+  }}
+>
+      <StarBackground />
       <Game />
       <Analytics />
     </div>
