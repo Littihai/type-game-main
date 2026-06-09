@@ -45,6 +45,17 @@ export function GameOver() {
       .catch(() => setRemoteSaveStatus('leaderboard save failed'))
   }, [difficulty, language, score, stats.accuracy, stats.totalWords, user, wave])
 
+  // Handle Enter key to play again
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Enter') {
+        resetGame();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [resetGame]);
+
   return (
     <div className="flex flex-col items-center justify-center h-full gap-6 px-8"
          style={{ background: '#0a0a1a' }}>

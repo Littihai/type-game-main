@@ -173,7 +173,10 @@ export function GameCanvas() {
 
     const render = () => {
       const time = performance.now() / 1000
-      const { enemies, activeEnemyId, particles } = useGameStore.getState()
+      const { enemies, activeEnemyId, particles, isPaused } = useGameStore.getState()
+
+      // ถ้าเกมหยุดอยู่ ให้หยุดการอัปเดตและวาดภาพเคลื่อนไหว
+      if (isPaused) { animRef.current = requestAnimationFrame(render); return; }
 
       ctx.fillStyle = '#050810'
       ctx.fillRect(0, 0, canvas.width, canvas.height)

@@ -152,8 +152,8 @@ export function HUD() {
       {/* Pause Button */}
       {isGamePlaying && ( // แสดงปุ่มเมื่อเกมกำลังเล่นเท่านั้น
         <button
-          onClick={togglePause}
-          className="absolute top-4 right-4 z-50 p-2 bg-gray-800/70 hover:bg-gray-700/80 text-white rounded-md transition-colors pointer-events-auto"
+          onClick={togglePause} // เรียกฟังก์ชัน togglePause เมื่อคลิก
+          className="absolute top-4 right-20 z-50 p-2 bg-gray-800/70 hover:bg-gray-700/80 text-white rounded-md transition-colors pointer-events-auto"
           aria-label={isPaused ? 'Resume Game' : 'Pause Game'}
         >
           {isPaused ? '▶️' : '⏸️'}
