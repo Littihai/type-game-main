@@ -1,10 +1,14 @@
 import { useState } from 'react'
 import { useGameStore } from '../store/gameStore'
 import { loadStorage } from '../store/storageStore'
+import { AuthPanel } from './AuthPanel'
+import { Leaderboard } from './Leaderboard'
+import { useFirebaseAuth } from '../hooks/useFirebaseAuth'
 
 export function Menu() {
   const { setStatus, setLanguage, setDifficulty } = useGameStore()
   const { highScore, totalGames, bestWave } = loadStorage()
+  const { user, loading, error, signInWithGoogle, signOutUser } = useFirebaseAuth()
   const [selectedLang, setSelectedLang] = useState<'thai' | 'english'>('english')
   const [selectedDiff, setSelectedDiff] = useState<'easy' | 'medium' | 'hard'>('easy')
 
@@ -15,8 +19,16 @@ export function Menu() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-6"
+    <div className="relative flex flex-col items-center justify-center h-full gap-6"
          style={{ background: '#0a0a1a' }}>
+      <AuthPanel
+        user={user}
+        loading={loading}
+        error={error}
+        onSignIn={signInWithGoogle}
+        onSignOut={signOutUser}
+      />
+      <Leaderboard enabled={Boolean(user)} />
 
       {/* title */}
       <div className="text-center">

@@ -1,0 +1,112 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: leaderboard
+    // Document ID: Firebase Auth uid
+    // Fields:
+    //   - uid: string (required, immutable) - owner uid
+    //   - displayName: string (required, 1-80 chars) - public leaderboard name
+    //   - photoURL: string|null (optional) - public avatar URL
+    //   - score: int (required, 1-100000000, non-decreasing) - best score
+    //   - wave: int (required, 1-10000) - wave reached for best score
+    //   - accuracy: int (required, 0-100) - typing accuracy percent
+    //   - words: int (required, 0-100000) - words destroyed
+    //   - language: string (required, thai|english)
+    //   - difficulty: string (required, easy|medium|hard)
+    //   - updatedAt: timestamp (required, request time)
+    //
+    // ===============================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasLeaderboardFields() {
+      return request.resource.data.keys().hasAll([
+        'uid',
+        'displayName',
+        'score',
+        'wave',
+        'accuracy',
+        'words',
+        'language',
+        'difficulty',
+        'updatedAt'
+      ]);
+    }
+
+    function hasOnlyLeaderboardFields() {
+      return request.resource.data.keys().hasOnly([
+        'uid',
+        'displayName',
+        'photoURL',
+        'score',
+        'wave',
+        'accuracy',
+        'words',
+        'language',
+        'difficulty',
+        'updatedAt'
+      ]);
+    }
+
+    function isValidOptionalPhotoUrl() {
+      return !('photoURL' in request.resource.data)
+        || request.resource.data.photoURL == null
+        || (
+          request.resource.data.photoURL is string
+          && request.resource.data.photoURL.size() <= 500
+          && (
+            request.resource.data.photoURL.matches('^https://.*')
+            || request.resource.data.photoURL.matches('^http://.*')
+          )
+        );
+    }
+
+    function isValidLeaderboardEntry(userId) {
+      return hasLeaderboardFields()
+        && hasOnlyLeaderboardFields()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.uid == userId
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() > 0
+        && request.resource.data.displayName.size() <= 80
+        && isValidOptionalPhotoUrl()
+        && request.resource.data.score is int
+        && request.resource.data.score > 0
+        && request.resource.data.score <= 100000000
+        && request.resource.data.wave is int
+        && request.resource.data.wave >= 1
+        && request.resource.data.wave <= 10000
+        && request.resource.data.accuracy is int
+        && request.resource.data.accuracy >= 0
+        && request.resource.data.accuracy <= 100
+        && request.resource.data.words is int
+        && request.resource.data.words >= 0
+        && request.resource.data.words <= 100000
+        && request.resource.data.language in ['thai', 'english']
+        && request.resource.data.difficulty in ['easy', 'medium', 'hard']
+        && request.resource.data.updatedAt == request.time;
+    }
+
+    match /leaderboard/{userId} {
+      allow read: if isAuthenticated();
+      allow create: if isOwner(userId)
+        && isValidLeaderboardEntry(userId);
+      allow update: if isOwner(userId)
+        && isValidLeaderboardEntry(userId)
+        && request.resource.data.uid == resource.data.uid
+        && request.resource.data.score >= resource.data.score;
+      allow delete: if false;
+    }
+  }
+}

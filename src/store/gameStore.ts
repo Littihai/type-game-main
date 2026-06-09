@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Particle } from '../game/particles'
+import { playGlassBreak } from './audio'
 
 export type GameStatus = 'menu' | 'settings' | 'playing' | 'waveclear' | 'gameover'
 export type Language = 'thai' | 'english'
@@ -38,6 +39,7 @@ export interface GameState {
   enemies: Enemy[]
   activeEnemyId: string | null
   language: Language
+  isPaused: boolean
   difficulty: Difficulty
   multiplier: number
   stats: GameStats
@@ -45,6 +47,7 @@ export interface GameState {
   particles: Particle[]
   isGodMode: boolean // 🦾 เก็บสถานะ เปิด/ปิด โหมดเทพ
   setStatus: (s: GameStatus) => void
+  togglePause: () => void
   setActiveEnemy: (id: string | null) => void
   setLanguage: (lang: Language) => void
   setDifficulty: (diff: Difficulty) => void
@@ -78,6 +81,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   enemies: [],
   activeEnemyId: null,
   language: 'english',
+  isPaused: false,
   difficulty: 'easy',
   multiplier: 1,
   stats: {
@@ -96,6 +100,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   isGodMode: false, // เริ่มต้นเกมโหมดเทพจะเป็นปิดเสมอ
 
   setStatus: (s) => set({ status: s }),
+  togglePause: () => set((state) => ({
+    isPaused: state.status === 'playing' ? !state.isPaused : false
+  })),
+
   setActiveEnemy: (id) => set({ activeEnemyId: id }),
   setLanguage: (lang) => set({ language: lang }),
   setDifficulty: (diff) => set({ difficulty: diff }),
@@ -170,7 +178,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       set({ kills: newKills })
     }
   },
-  loseLife: () => set((state) => ({ lives: state.lives - 1 })),
+  loseLife: () => {
+    playGlassBreak();
+    set((state) => ({ lives: state.lives - 1 }));
+  },
   nextWave: () => {
     const { wave } = get()
     const next = wave + 1
@@ -185,7 +196,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     })
   },
   resetGame: () => set({
-    score: 0, lives: 3, wave: 1,
+    score: 0, lives: 3, wave: 1, isPaused: false,
     kills: 0, killsToNext: 10,
     enemies: [], activeEnemyId: null, status: 'playing',
     multiplier: 1,
@@ -203,10 +214,10 @@ export const useGameStore = create<GameState>((set, get) => ({
   enableGodModeAutoType: (onToggle) => {
     // 1. วนลูปเช็คเพื่อพิมพ์ตัวอักษรถัดไปอัตโนมัติ
     const autoTypeInterval = setInterval(() => {
-      const { isGodMode, status, enemies, activeEnemyId, recordChar, increaseMultiplier, updateEnemyTyped, recordWord, addScore, addKill, removeEnemy, setActiveEnemy } = get()
+      const { isGodMode, isPaused, status, enemies, activeEnemyId, recordChar, increaseMultiplier, updateEnemyTyped, recordWord, addScore, addKill, removeEnemy, setActiveEnemy } = get()
 
-      // ถ้าไม่ได้เปิดโหมดเทพ หรือไม่ได้อยู่ในหน้าเล่นเกม หรือไม่มีศัตรูโผล่มา ให้ข้ามลูปนี้ไปก่อน
-      if (!isGodMode || status !== 'playing' || enemies.length === 0) return
+      // ถ้าไม่ได้เปิดโหมดเทพ หรือหยุดเกมอยู่ หรือไม่ได้อยู่ในหน้าเล่นเกม หรือไม่มีศัตรูโผล่มา ให้ข้ามลูปนี้ไปก่อน
+      if (!isGodMode || isPaused || status !== 'playing' || enemies.length === 0) return
 
       // ล็อกเป้าศัตรู: ถ้ามีตัวที่กำลังพิมพ์ค้างไว้ให้เลือกตัวนั้น ถ้าไม่มีให้เอาตัวแรกสุดในแถว
       let targetEnemy = enemies.find(e => e.id === activeEnemyId)

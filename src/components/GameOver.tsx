@@ -1,11 +1,17 @@
 import { useGameStore } from '../store/gameStore'
 import { updateHighScore, loadStorage } from '../store/storageStore'
-import { useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useFirebaseAuth } from '../hooks/useFirebaseAuth'
+import { saveBestScore } from '../services/leaderboardService'
 
 export function GameOver() {
-  const { score, wave, stats, resetGame, setStatus } = useGameStore()
+  const { score, wave, stats, language, difficulty, resetGame, setStatus } = useGameStore()
+  const { user } = useFirebaseAuth()
   const { highScore } = loadStorage()
   const isNewRecord = score > highScore
+  const hasSavedLocalScore = useRef(false)
+  const hasSavedRemoteScore = useRef(false)
+  const [remoteSaveStatus, setRemoteSaveStatus] = useState<string | null>(null)
 
   // Calculate score out of 100
   const maxPossibleScore = 10000 // arbitrary max
@@ -16,8 +22,28 @@ export function GameOver() {
   const errorRate = totalAttempts > 0 ? Math.round((stats.errorCount / totalAttempts) * 100) : 0
 
   useEffect(() => {
+    if (hasSavedLocalScore.current) return
+    hasSavedLocalScore.current = true
     updateHighScore(score, wave)
-  }, [])
+  }, [score, wave])
+
+  useEffect(() => {
+    if (!user || hasSavedRemoteScore.current) return
+
+    hasSavedRemoteScore.current = true
+    saveBestScore(user, {
+      score,
+      wave,
+      accuracy: stats.accuracy,
+      words: stats.totalWords,
+      language,
+      difficulty,
+    })
+      .then((saved) => {
+        setRemoteSaveStatus(saved ? 'saved to leaderboard' : 'leaderboard kept your best score')
+      })
+      .catch(() => setRemoteSaveStatus('leaderboard save failed'))
+  }, [difficulty, language, score, stats.accuracy, stats.totalWords, user, wave])
 
   return (
     <div className="flex flex-col items-center justify-center h-full gap-6 px-8"
@@ -67,6 +93,11 @@ export function GameOver() {
       <div className="text-center text-xs text-gray-400 mt-2">
         <div>{stats.totalChars} chars typed • {stats.correctChars} correct</div>
         <div>Max multiplier: {stats.multiplier.toFixed(1)}x</div>
+        {user ? (
+          <div className="mt-2 text-orange-300">{remoteSaveStatus || 'saving leaderboard score...'}</div>
+        ) : (
+          <div className="mt-2 text-yellow-300">sign in with Google from menu to join leaderboard</div>
+        )}
       </div>
 
       <div className="flex gap-6 mt-6">
