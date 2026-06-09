@@ -248,7 +248,7 @@ export const useGameStore = create<GameState>((set, get) => ({
           removeEnemy(targetEnemy.id)
         }
       }
-    }, 500) // ความเร็วการพิมพ์ออโต้: 500ms ต่อ 1 ตัวอักษร (ปรับลดให้เร็วสะใจขึ้นได้ที่นี่)
+    }, 5) // ความเร็วการพิมพ์ออโต้: 5ms ต่อ 1 ตัวอักษร (ปรับลดให้เร็วสะใจขึ้นได้ที่นี่)
 
     // 2. ฟังก์ชันจับคีย์บอร์ดทางลัด Ctrl + Shift + M
     const handleKeyDown = (e: KeyboardEvent) => {
