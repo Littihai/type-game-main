@@ -10,7 +10,7 @@ import { Menu } from './components/Menu'
 import { GameOver } from './components/GameOver'
 import { WaveClear } from './components/WaveClear'
 import { Settings } from './components/Settings'
-
+import { Analytics } from "@vercel/analytics/next"
 function Game() {
   useKeyboard()
   useGameLoop()
@@ -75,6 +75,7 @@ export default function App() {
     <div className="min-h-screen flex items-center justify-center"
          style={{ background: '#05050f' }}>
       <Game />
+      <Analytics />
     </div>
   )
 }
