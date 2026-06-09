@@ -10,7 +10,7 @@ import { Menu } from './components/Menu'
 import { GameOver } from './components/GameOver'
 import { WaveClear } from './components/WaveClear'
 import { Settings } from './components/Settings'
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/react"
 function Game() {
   useKeyboard()
   useGameLoop()
