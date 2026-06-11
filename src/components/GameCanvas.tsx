@@ -283,7 +283,7 @@ export function GameCanvas() {
       width={800}
       height={600}
       className="block mx-auto"
-      style={{ background: '#050810' }}
+      style={{ background: 'transparent' }}
     />
   )
 }
